@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// 設定基本URL，實際整合時需要調整
+// 設定基本URL
 const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const api = axios.create({
@@ -22,16 +22,16 @@ api.interceptors.response.use(
 // API服務函數
 const apiService = {
   // 生成STAR報告
-  generateStarReport: async (story) => {
+  generateStarReport: async (data) => {
     try {
-      const response = await api.post('/api/generate', { story });
+      const response = await api.post('/api/generate', data);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  // 儲存報告 (可選功能)
+  // 儲存報告
   saveReport: async (reportData) => {
     try {
       const response = await api.post('/api/reports', reportData);
@@ -41,7 +41,7 @@ const apiService = {
     }
   },
 
-  // 讀取歷史報告 (可選功能)
+  // 讀取歷史報告
   getReports: async () => {
     try {
       const response = await api.get('/api/reports');
