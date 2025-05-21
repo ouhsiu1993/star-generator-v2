@@ -69,15 +69,6 @@ const StarReport = ({ report, onNewReport }) => {
     // 設置為已保存狀態
     setIsSaved(true);
     
-    // 顯示成功提示
-    toast({
-      title: "報告儲存成功",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-      position: "top",
-    });
-    
     // 2秒後恢復為未保存狀態
     setTimeout(() => {
       setIsSaved(false);
