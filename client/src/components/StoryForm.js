@@ -169,6 +169,15 @@ const StoryForm = React.forwardRef(({
             isDisabled={isLoading} // 只在加載時禁用
             onClick={onOpen}
             width={{ base: "100%", sm: "auto" }}
+            _disabled={{ 
+              opacity: 0.4, 
+              cursor: "not-allowed",
+              boxShadow: "none",
+              backgroundColor: "transparent",
+              pointerEvents: "none",
+              zIndex: "auto"
+            }}
+            zIndex="auto"
           >
             載入報告
           </Button>
@@ -260,6 +269,15 @@ const StoryForm = React.forwardRef(({
               size="md"
               isDisabled={isLoading} // 只在加載時禁用
               width={{ base: '100%', sm: 'auto' }}
+              _disabled={{ 
+                opacity: 0.4, 
+                cursor: "not-allowed",
+                boxShadow: "none",
+                backgroundColor: "transparent",
+                pointerEvents: "none",
+                zIndex: "auto"
+              }}
+              zIndex="auto"
             >
               載入範本
             </Button>
@@ -271,6 +289,16 @@ const StoryForm = React.forwardRef(({
               colorScheme="red"
               isDisabled={story.trim() === '' || isLoading} // 只在加載時或內容為空時禁用
               width={{ base: '100%', sm: 'auto' }}
+              _disabled={{ 
+                opacity: 0.4, 
+                cursor: "not-allowed",
+                boxShadow: "none",
+                backgroundColor: "transparent",
+                borderColor: "transparent",
+                pointerEvents: "none",
+                zIndex: "auto"
+              }}
+              zIndex="auto"
             >
               清除內容
             </Button>
@@ -286,6 +314,14 @@ const StoryForm = React.forwardRef(({
             size="md"
             width={{ base: '100%', md: 'auto' }}
             mt={{ base: 2, md: 0 }} // 在行動裝置上增加上邊距
+            _disabled={{ 
+              opacity: 0.4, 
+              cursor: "not-allowed",
+              boxShadow: "none",
+              pointerEvents: "none",
+              zIndex: "auto"
+            }}
+            zIndex="auto"
           >
             生成STAR報告
           </Button>
