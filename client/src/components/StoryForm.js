@@ -256,7 +256,7 @@ const StoryForm = React.forwardRef(({
               size="md"
               isDisabled={isLoading} // 只在加載時禁用
             >
-              產生隨機故事
+              載入範本
             </Button>
             <Button
               leftIcon={<FiTrash2 />}
