@@ -138,7 +138,7 @@ const Home = () => {
           mx="auto"
           fontWeight="medium"
         >
-          輸入故事內容來自動生成STAR報告
+          輸入故事內容讓 AI 自動生成
         </Text>
       </Box>
       

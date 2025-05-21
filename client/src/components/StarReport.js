@@ -126,7 +126,7 @@ const handleReturn = () => {
       <VStack spacing={6} align="stretch">
         <Flex justify="space-between" align="center">
           <Heading as="h3" size="lg" color={useColorModeValue("gray.700", "white")}>
-            STAR 結構化報告
+            STAR 報告
           </Heading>
           <HStack spacing={2}>
             <Tooltip hasArrow label="複製報告" placement="top">
@@ -188,7 +188,7 @@ const handleReturn = () => {
             variant="outline"
             mt={2}
           >
-            返回頂部創建新報告
+            創建新報告
           </Button>
         </Box>
       </VStack>

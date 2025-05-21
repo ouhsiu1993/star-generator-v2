@@ -13,7 +13,7 @@ const Header = () => {
         <Flex align="center">
           <FiStar size={24} color="#4299E1" />
           <Heading as="h1" size="lg" ml={2} color={useColorModeValue("gray.700", "white")}>
-            STAR Generator
+            GenAI STAR
           </Heading>
         </Flex>
         <IconButton
