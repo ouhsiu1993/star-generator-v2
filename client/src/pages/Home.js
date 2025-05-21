@@ -34,11 +34,11 @@ const Home = () => {
     }
   };
   
-  // 重置表單和移除報告顯示
+  // 重置表單和移除報告顯示 - 只重置故事內容
   const resetForm = () => {
     setShowReport(false); // 隱藏報告區塊
     
-    // 使用 ref 重置表單
+    // 使用 ref 重置表單 - 這裡會調用 StoryForm 中的 resetForm 方法，它現在只會重置故事內容
     if (storyFormRef.current) {
       storyFormRef.current.resetForm();
     }

@@ -69,15 +69,10 @@ const StoryForm = React.forwardRef(({
   React.useImperativeHandle(ref, () => ({
     resetForm: () => {
       setStory('');
-      setCompetency('');
-      setStoreCategory('');
       if (onStoryChange) {
         onStoryChange('');
       }
-      // 如果有表單引用，重置 HTML 表單元素
-      if (formRef.current) {
-        formRef.current.reset();
-      }
+      // 注意：這裡不再重置核心職能和商店類別
     }
   }));
   
@@ -99,23 +94,12 @@ const StoryForm = React.forwardRef(({
     setStoreCategory(e.target.value);
   };
 
-  // 完全重置表單的函數 (內部使用)
-  const resetFormInternal = () => {
+  // 清除按鈕處理函數 - 只清除故事文本
+  const handleClear = () => {
     setStory('');
-    setCompetency('');
-    setStoreCategory('');
     if (onStoryChange) {
       onStoryChange('');
     }
-    // 如果有表單引用，重置 HTML 表單元素
-    if (formRef.current) {
-      formRef.current.reset();
-    }
-  };
-
-  // 清除按鈕處理函數
-  const handleClear = () => {
-    resetFormInternal();
   };
 
   // 提交表單
