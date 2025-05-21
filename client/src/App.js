@@ -12,6 +12,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 
 // 創建一個上下文來管理應用程式狀態
@@ -76,12 +77,13 @@ function App() {
       isLoading,
       setIsLoading
     }}>
-      <Box minH="100vh" bg={bgColor}>
-      <Header />
-      <Box as="main" maxW="container.xl" mx="auto" p={4}>
-        <Home />
+      <Box minH="100vh" bg={bgColor} display="flex" flexDirection="column">
+        <Header />
+        <Box as="main" maxW="container.xl" mx="auto" p={4} flex="1">
+          <Home />
+        </Box>
+        <Footer />
       </Box>
-          </Box>
       
       {/* 離開頁面確認對話框 */}
       <AlertDialog

@@ -4,12 +4,16 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const reportRoutes = require('./routes/reportRoutes');
+const { connectDB } = require('./config/database');
 
 require('dotenv').config();
 
 // 初始化 Express 應用
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// 連接到 MongoDB
+connectDB();
 
 // 設置安全中間件
 app.use(helmet());

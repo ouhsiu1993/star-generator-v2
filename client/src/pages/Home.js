@@ -83,6 +83,36 @@ const Home = () => {
       setIsLoading(false);
     }
   };
+  
+  // 處理載入報告
+  const handleReportLoaded = (loadedReport) => {
+    if (loadedReport) {
+      // 設置報告數據
+      setReport(loadedReport);
+      
+      // 如果有原始故事，設置故事內容
+      if (loadedReport.originalStory) {
+        setStory(loadedReport.originalStory);
+      }
+      
+      // 提示用戶
+      toast({
+        title: '報告載入成功',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+      
+      // 滾動到報告部分
+      setTimeout(() => {
+        window.scrollTo({ 
+          top: document.body.scrollHeight, 
+          behavior: 'smooth' 
+        });
+      }, 100);
+    }
+  };
 
   return (
     <VStack spacing={8} my={8} align="stretch">
@@ -101,7 +131,14 @@ const Home = () => {
         </Text>
       </Box>
       
-      <StoryForm ref={storyFormRef} onSubmit={generateReport} isLoading={isLoading} onStoryChange={handleStoryChange} isDisabled={isFormDisabled} />
+      <StoryForm 
+        ref={storyFormRef} 
+        onSubmit={generateReport} 
+        isLoading={isLoading} 
+        onStoryChange={handleStoryChange} 
+        isDisabled={isFormDisabled}
+        onReportLoaded={handleReportLoaded}
+      />
       
       {report && <StarReport report={report} onNewReport={resetForm} />}
     </VStack>

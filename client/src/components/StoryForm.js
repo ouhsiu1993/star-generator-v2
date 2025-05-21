@@ -13,41 +13,28 @@ import {
   HStack,
   Select,
   Flex,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { FiSend, FiFileText, FiTrash2, FiDownload } from 'react-icons/fi';
+import LoadReportsDialog from './LoadReportsDialog';
+import { getCompetencyOptions, getStoreCategoryOptions } from '../utils/formatters';
 
 const MAX_CHARS = 300;
 
-const coreCompetencies = [
-  { value: "", label: "請選擇核心職能" },
-  { value: "integrity", label: "誠信積極" },
-  { value: "excellence", label: "追求卓越" },
-  { value: "innovation", label: "引發創新" },
-  { value: "service", label: "服務導向" },
-  { value: "teamwork", label: "團隊共贏" }
-];
-
-const storeCategories = [
-  { value: "", label: "請選擇商店類別" },
-  { value: "skincare", label: "保養" },
-  { value: "makeup", label: "彩妝" },
-  { value: "fragrance", label: "香水香氛" },
-  { value: "women_luxury", label: "女仕精品" },
-  { value: "men_luxury", label: "男仕精品" },
-  { value: "digital", label: "數位家電" },
-  { value: "toys", label: "玩具" },
-  { value: "home", label: "居家生活" },
-  { value: "souvenir", label: "伴手禮" },
-  { value: "tobacco_alcohol", label: "菸酒" }
-];
-
-const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisabled = false }, ref) => {
+const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisabled = false, onReportLoaded }, ref) => {
   const formRef = useRef(null);
   const [story, setStory] = useState('');
   const [competency, setCompetency] = useState('');
   const [storeCategory, setStoreCategory] = useState('');
   const charsLeft = MAX_CHARS - story.length;
   const isOverLimit = charsLeft < 0;
+  
+  // 載入報告對話框
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // 獲取選項
+  const competencyOptions = getCompetencyOptions(false); // 不包含空選項
+  const storeCategoryOptions = getStoreCategoryOptions(false); // 不包含空選項
   
   // 暴露重置方法給外部
   React.useImperativeHandle(ref, () => ({
@@ -110,6 +97,13 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
     }
   };
 
+  // 處理載入報告
+  const handleReportSelected = (report) => {
+    if (report && onReportLoaded) {
+      onReportLoaded(report);
+    }
+  };
+
   const handleSampleStory = () => {
     // 創建多個範例故事模板
     const storyTemplates = [
@@ -151,6 +145,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             variant="outline"
             colorScheme="teal"
             isDisabled={isLoading || isDisabled}
+            onClick={onOpen}
           >
             載入報告
           </Button>
@@ -167,7 +162,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             isDisabled={isLoading || isDisabled}
             size="md"
           >
-            {coreCompetencies.slice(1).map((option) => (
+            {competencyOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -186,7 +181,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             isDisabled={isLoading || isDisabled}
             size="md"
           >
-            {storeCategories.slice(1).map((option) => (
+            {storeCategoryOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -257,8 +252,15 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
           </Button>
         </Box>
       </VStack>
+
+      {/* 載入報告對話框 */}
+      <LoadReportsDialog 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        onReportSelect={handleReportSelected} 
+      />
     </Box>
   );
-})
+});
 
 export default StoryForm;

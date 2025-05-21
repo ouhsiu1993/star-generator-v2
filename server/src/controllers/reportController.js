@@ -1,5 +1,6 @@
 const { openai, config } = require('../config/openai');
 const { generateStarPrompt } = require('../utils/prompts');
+const Report = require('../models/Report');
 
 /**
  * 生成 STAR 報告
@@ -44,6 +45,11 @@ const generateStarReport = async (req, res) => {
         throw new Error('OpenAI 回應格式不正確');
       }
       
+      // 添加原始故事和類別信息到報告數據中
+      reportData.originalStory = story;
+      reportData.competency = competency;
+      reportData.storeCategory = storeCategory;
+      
       // 返回成功響應
       return res.status(200).json({
         success: true,
@@ -59,7 +65,10 @@ const generateStarReport = async (req, res) => {
           situation: responseContent.substring(0, 100),
           task: responseContent.substring(100, 200),
           action: responseContent.substring(200, 300),
-          result: responseContent.substring(300, 400)
+          result: responseContent.substring(300, 400),
+          competency,
+          storeCategory,
+          originalStory: story
         },
         rawResponse: responseContent
       });
@@ -75,40 +84,124 @@ const generateStarReport = async (req, res) => {
 };
 
 /**
- * 保存報告到數據庫（未實現，僅占位）
+ * 保存報告到數據庫
+ * @param {Object} req - 包含報告數據的請求對象
+ * @param {Object} res - 響應對象
  */
 const saveReport = async (req, res) => {
   try {
-    // 實際應用中，這裡會保存報告到數據庫
-    res.status(200).json({
+    const { situation, task, action, result, competency, storeCategory, originalStory } = req.body;
+
+    // 驗證必要欄位
+    if (!situation || !task || !action || !result || !competency || !storeCategory) {
+      return res.status(400).json({
+        success: false,
+        error: '報告缺少必要欄位'
+      });
+    }
+
+    // 創建新報告
+    const report = new Report({
+      situation,
+      task,
+      action,
+      result,
+      competency,
+      storeCategory,
+      originalStory: originalStory || ''
+    });
+
+    // 保存到數據庫
+    await report.save();
+
+    // 返回成功響應和報告 ID
+    res.status(201).json({
       success: true,
       message: '報告保存成功',
-      data: { id: Math.random().toString(36).substring(7) }
+      data: { id: report._id }
     });
   } catch (error) {
     console.error('保存報告錯誤:', error);
     res.status(500).json({
       success: false,
-      error: '保存報告時出錯'
+      error: '保存報告時出錯: ' + error.message
     });
   }
 };
 
 /**
- * 獲取保存的報告（未實現，僅占位）
+ * 獲取保存的報告
+ * @param {Object} req - 請求對象，可能包含過濾條件
+ * @param {Object} res - 響應對象
  */
 const getReports = async (req, res) => {
   try {
-    // 實際應用中，這裡會從數據庫獲取報告
+    const { competency, storeCategory, limit = 10, page = 1 } = req.query;
+    
+    // 構建查詢條件
+    const query = {};
+    if (competency) query.competency = competency;
+    if (storeCategory) query.storeCategory = storeCategory;
+    
+    // 計算跳過的文檔數量
+    const skip = (page - 1) * limit;
+    
+    // 查詢數據庫
+    const reports = await Report.find(query)
+      .sort({ createdAt: -1 }) // 按創建時間降序排序
+      .limit(parseInt(limit))
+      .skip(skip);
+    
+    // 計算總數量，用於分頁
+    const total = await Report.countDocuments(query);
+    
     res.status(200).json({
       success: true,
-      data: []
+      data: reports,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error('獲取報告錯誤:', error);
     res.status(500).json({
       success: false,
-      error: '獲取報告時出錯'
+      error: '獲取報告時出錯: ' + error.message
+    });
+  }
+};
+
+/**
+ * 根據 ID 獲取單個報告
+ * @param {Object} req - 請求對象，包含報告 ID
+ * @param {Object} res - 響應對象
+ */
+const getReportById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 查詢數據庫
+    const report = await Report.findById(id);
+    
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        error: '找不到此報告'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: report
+    });
+  } catch (error) {
+    console.error('獲取報告錯誤:', error);
+    res.status(500).json({
+      success: false,
+      error: '獲取報告時出錯: ' + error.message
     });
   }
 };
@@ -116,5 +209,6 @@ const getReports = async (req, res) => {
 module.exports = {
   generateStarReport,
   saveReport,
-  getReports
+  getReports,
+  getReportById
 };

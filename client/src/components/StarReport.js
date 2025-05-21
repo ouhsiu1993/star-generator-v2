@@ -20,13 +20,17 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
 } from '@chakra-ui/react';
-import { FiCopy, FiSave } from 'react-icons/fi';
+import { FiCopy, FiSave, FiCheck } from 'react-icons/fi';
 import { AppContext } from '../App';
+import apiService from '../utils/apiService';
+import { formatReportText } from '../utils/formatters';
 
 const StarReport = ({ report, onNewReport }) => {
   const reportRef = useRef(null);
   const cancelRef = useRef();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const toast = useToast();
   const { setHasContent } = useContext(AppContext);
   const bgColor = useColorModeValue('white', 'gray.700');
@@ -40,21 +44,9 @@ const StarReport = ({ report, onNewReport }) => {
 
   // 複製報告內容
   const copyReport = () => {
-    const reportText = `STAR 報告：
-    
-情境 (Situation):
-${report.situation}
-
-任務 (Task):
-${report.task}
-
-行動 (Action):
-${report.action}
-
-結果 (Result):
-${report.result}`;
-
+    const reportText = formatReportText(report);
     navigator.clipboard.writeText(reportText);
+    
     toast({
       title: "已複製",
       status: "success",
@@ -64,25 +56,62 @@ ${report.result}`;
     });
   };
 
-  // 儲存報告 (功能之後串接)
-  const saveReport = () => {
-    try {
-      // 這裡之後會串接API儲存功能
+  // 儲存報告
+  const saveReport = async () => {
+    if (isSaved) {
       toast({
-        title: "儲存成功",
-        status: "success",
+        title: "報告已儲存",
+        description: "此報告已成功儲存",
+        status: "info",
         duration: 2000,
         isClosable: true,
         position: "top",
       });
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      // 建立報告數據
+      const reportData = {
+        situation: report.situation,
+        task: report.task,
+        action: report.action,
+        result: report.result,
+        competency: report.competency,
+        storeCategory: report.storeCategory,
+        originalStory: report.originalStory || ''
+      };
+      
+      // 呼叫 API 儲存
+      const response = await apiService.saveReport(reportData);
+      
+      if (response.success) {
+        setIsSaved(true);
+        toast({
+          title: "儲存成功",
+          description: "報告已成功儲存到數據庫",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+      } else {
+        throw new Error(response.error || '儲存失敗');
+      }
     } catch (error) {
+      console.error('儲存報告錯誤:', error);
       toast({
         title: "儲存失敗",
+        description: error.message || "請稍後再試",
         status: "error",
-        duration: 2000,
+        duration: 3000,
         isClosable: true,
         position: "top",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
   
@@ -144,12 +173,14 @@ ${report.result}`;
                 variant="ghost"
               />
             </Tooltip>
-            <Tooltip hasArrow label="儲存報告" placement="top">
+            <Tooltip hasArrow label={isSaved ? "已儲存" : "儲存報告"} placement="top">
               <IconButton
-                icon={<FiSave />}
+                icon={isSaved ? <FiCheck /> : <FiSave />}
                 onClick={saveReport}
                 aria-label="儲存報告"
                 variant="ghost"
+                isLoading={isSaving}
+                colorScheme={isSaved ? "green" : "blue"}
               />
             </Tooltip>
           </HStack>

@@ -41,15 +41,25 @@ const apiService = {
     }
   },
 
-  // 讀取歷史報告
-  getReports: async () => {
+  // 獲取報告列表
+  getReports: async (params = {}) => {
     try {
-      const response = await api.get('/api/reports');
+      const response = await api.get('/api/reports', { params });
       return response.data;
     } catch (error) {
       throw error;
     }
   },
+  
+  // 根據 ID 獲取單個報告
+  getReportById: async (id) => {
+    try {
+      const response = await api.get(`/api/reports/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default apiService;
