@@ -127,7 +127,7 @@ export const getStoreCategoryOptions = (includeEmpty = true) => {
 export const formatReportText = (report) => {
   if (!report) return '';
   
-  return `STAR 報告：
+  return `STAR 報告：${report.name || '未命名報告'}
     
 情境 (Situation):
 ${report.situation}

@@ -47,42 +47,45 @@ const Home = () => {
   };
 
   // 生成報告的函數 - 使用 API 服務
-  const generateReport = async (story, competency, storeCategory) => {
-    setIsLoading(true);
+const generateReport = async (story, competency, storeCategory) => {
+  setIsLoading(true);
+  
+  try {
+    // 調用 API 服務
+    const response = await apiService.generateStarReport({ 
+      story, 
+      competency, 
+      storeCategory 
+    });
     
-    try {
-      // 調用 API 服務
-      const response = await apiService.generateStarReport({ 
-        story, 
-        competency, 
-        storeCategory 
-      });
-      
-      // 設置報告數據
-      setReport(response.data);
-      
-      toast({
-        title: '報告生成成功',
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-        position: 'top',
-      });
-    } catch (error) {
-      console.error('Error generating report:', error);
-      
-      toast({
-        title: '報告生成失敗',
-        description: error.response?.data?.error || '請稍後再試',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // 設置報告數據
+    setReport(response.data);
+    
+    // 以下行應刪除或註釋掉，以保持表單可用
+    // setIsFormDisabled(true); 
+    
+    toast({
+      title: '報告生成成功',
+      status: 'success',
+      duration: 2000,
+      isClosable: true,
+      position: 'top',
+    });
+  } catch (error) {
+    console.error('Error generating report:', error);
+    
+    toast({
+      title: '報告生成失敗',
+      description: error.response?.data?.error || '請稍後再試',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+      position: 'top',
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
   
   // 處理載入報告
   const handleReportLoaded = (loadedReport) => {

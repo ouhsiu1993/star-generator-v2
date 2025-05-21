@@ -21,7 +21,7 @@ app.use(helmet());
 // 設置 CORS
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'], // 確保包含DELETE方法
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 

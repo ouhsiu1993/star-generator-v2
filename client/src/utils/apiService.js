@@ -59,6 +59,16 @@ const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+  
+  // 刪除報告
+  deleteReport: async (id) => {
+    try {
+      const response = await api.delete(`/api/reports/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

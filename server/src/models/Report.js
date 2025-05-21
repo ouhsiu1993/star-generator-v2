@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 // 定義 STAR 報告的 Schema
 const reportSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    default: '未命名報告'
+  },
   situation: {
     type: String,
     required: true,
@@ -44,7 +50,7 @@ const reportSchema = new mongoose.Schema({
 });
 
 // 添加報告 Schema 的索引，以便更快檢索
-reportSchema.index({ competency: 1, storeCategory: 1, createdAt: -1 });
+reportSchema.index({ name: 1, competency: 1, storeCategory: 1, createdAt: -1 });
 
 const Report = mongoose.model('Report', reportSchema);
 

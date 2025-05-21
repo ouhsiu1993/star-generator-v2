@@ -14,4 +14,7 @@ router.get('/reports', reportController.getReports);
 // 根據 ID 獲取單個報告
 router.get('/reports/:id', reportController.getReportById);
 
+// 刪除報告
+router.delete('/reports/:id', reportController.deleteReport);
+
 module.exports = router;

@@ -180,7 +180,9 @@ const generateStarReport = async (req, res) => {
  */
 const saveReport = async (req, res) => {
   try {
-    const { situation, task, action, result, competency, storeCategory, originalStory } = req.body;
+    const { name, situation, task, action, result, competency, storeCategory, originalStory } = req.body;
+
+    console.log('接收到的報告數據:', req.body); // 添加日誌以便調試
 
     // 驗證必要欄位
     if (!situation || !task || !action || !result || !competency || !storeCategory) {
@@ -190,8 +192,9 @@ const saveReport = async (req, res) => {
       });
     }
 
-    // 創建新報告
+    // 創建新報告，確保包含 name 字段
     const report = new Report({
+      name: name || '未命名報告', // 提供默認值以防 name 為空
       situation,
       task,
       action,
@@ -201,8 +204,12 @@ const saveReport = async (req, res) => {
       originalStory: originalStory || ''
     });
 
+    console.log('準備保存報告:', report); // 添加日誌以便調試
+
     // 保存到數據庫
     await report.save();
+
+    console.log('報告保存成功，ID:', report._id); // 添加日誌以便調試
 
     // 返回成功響應和報告 ID
     res.status(201).json({
@@ -212,6 +219,16 @@ const saveReport = async (req, res) => {
     });
   } catch (error) {
     console.error('保存報告錯誤:', error);
+    
+    // 如果錯誤涉及驗證失敗，提供更具體的錯誤消息
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        error: '驗證錯誤: ' + errors.join(', ')
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: '保存報告時出錯: ' + error.message
@@ -296,9 +313,42 @@ const getReportById = async (req, res) => {
   }
 };
 
+/**
+ * 刪除報告
+ * @param {Object} req - 請求對象，包含報告 ID
+ * @param {Object} res - 響應對象
+ */
+const deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 查詢數據庫並刪除報告
+    const result = await Report.findByIdAndDelete(id);
+    
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        error: '找不到此報告'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: '報告已成功刪除'
+    });
+  } catch (error) {
+    console.error('刪除報告錯誤:', error);
+    res.status(500).json({
+      success: false,
+      error: '刪除報告時出錯: ' + error.message
+    });
+  }
+};
+
 module.exports = {
   generateStarReport,
   saveReport,
   getReports,
-  getReportById
+  getReportById,
+  deleteReport
 };

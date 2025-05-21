@@ -140,18 +140,18 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
     >
       <VStack spacing={4} align="stretch">
         {/* 載入報告按鈕 */}
-        <Flex justify="flex-end">
-          <Button
-            leftIcon={<FiDownload />}
-            size="sm"
-            variant="outline"
-            colorScheme="teal"
-            isDisabled={isLoading || isDisabled}
-            onClick={onOpen}
-          >
-            載入報告
-          </Button>
-        </Flex>
+<Flex justify="flex-end">
+  <Button
+    leftIcon={<FiDownload />}
+    size="md" // 從 sm 改為 md，使按鈕更大
+    variant="outline"
+    colorScheme="teal"
+    isDisabled={isLoading} // 移除 isDisabled 條件，使報告生成後按鈕也可用
+    onClick={onOpen}
+  >
+    載入報告
+  </Button>
+</Flex>
         
         <FormControl isRequired>
           <FormLabel fontSize="md" fontWeight="medium" color={useColorModeValue("gray.700", "white")}>
@@ -241,17 +241,17 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
               清除內容
             </Button>
           </HStack>
-          <Button
-            type="submit"
-            leftIcon={<FiSend />}
-            colorScheme="blue"
-            isLoading={isLoading}
-            loadingText="生成中..."
-            isDisabled={story.trim() === '' || isOverLimit || isDisabled || !competency || !storeCategory}
-            size="lg"
-          >
-            生成STAR報告
-          </Button>
+<Button
+  type="submit"
+  leftIcon={<FiSend />}
+  colorScheme="blue"
+  isLoading={isLoading}
+  loadingText="生成中..."
+  isDisabled={story.trim() === '' || isOverLimit || isDisabled || !competency || !storeCategory}
+  size="md" // 從 lg 改為 md，使按鈕與其他按鈕大小一致
+>
+  生成STAR報告
+</Button>
         </Box>
       </VStack>
 
