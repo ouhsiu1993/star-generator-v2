@@ -29,7 +29,9 @@ import {
   AlertDialogFooter,
   Input,
   InputGroup,
-  InputLeftElement
+  InputLeftElement,
+  Stack,
+  Container
 } from '@chakra-ui/react';
 import { FiSearch, FiCheck, FiChevronLeft, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import apiService from '../utils/apiService';
@@ -61,8 +63,14 @@ const ReportItem = ({ report, onSelect, onDelete, isSelected }) => {
       position="relative"
     >
       <VStack align="start" spacing={2}>
-        <Flex width="100%" justify="space-between" wrap="wrap">
-          <HStack spacing={2}>
+        <Flex 
+          width="100%" 
+          justify="space-between" 
+          wrap="wrap"
+          direction={{ base: 'column', sm: 'row' }}
+          gap={{ base: 1, sm: 0 }}
+        >
+          <HStack spacing={2} mb={{ base: 1, sm: 0 }}>
             <Badge colorScheme="teal">{getCompetencyName(report.competency)}</Badge>
             <Badge colorScheme="purple">{getStoreCategoryName(report.storeCategory)}</Badge>
           </HStack>
@@ -273,10 +281,15 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
   
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        size={{ base: "full", md: "xl" }}
+        isCentered
+      >
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>載入已儲存的報告</ModalHeader>
+        <ModalContent mx={{ base: 2, md: 'auto' }}>
+          <ModalHeader fontSize={{ base: "lg", md: "xl" }}>載入已儲存的報告</ModalHeader>
           <ModalCloseButton />
           
           <ModalBody>
@@ -295,8 +308,8 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
                 />
               </InputGroup>
               
-              <Flex gap={4} wrap="wrap">
-                <Box flex="1" minW="200px">
+              <Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
+                <Box flex="1" minW={{ base: "100%", md: "200px" }}>
                   <Select
                     value={filters.competency}
                     onChange={(e) => handleFilterChange('competency', e.target.value)}
@@ -308,7 +321,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
                   </Select>
                 </Box>
                 
-                <Box flex="1" minW="200px">
+                <Box flex="1" minW={{ base: "100%", md: "200px" }}>
                   <Select
                     value={filters.storeCategory}
                     onChange={(e) => handleFilterChange('storeCategory', e.target.value)}
@@ -325,10 +338,11 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
                   onClick={applyFilters}
                   colorScheme="blue"
                   isLoading={loading}
+                  width={{ base: "100%", md: "auto" }}
                 >
                   查詢
                 </Button>
-              </Flex>
+              </Stack>
             </VStack>
             
             <Divider mb={4} />
@@ -348,7 +362,13 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
                 </Text>
               </Flex>
             ) : (
-              <VStack spacing={3} align="stretch" maxH="400px" overflowY="auto" pr={2}>
+              <VStack 
+                spacing={3} 
+                align="stretch" 
+                maxH={{ base: "50vh", md: "400px" }} 
+                overflowY="auto" 
+                pr={2}
+              >
                 {reports.map(report => (
                   <ReportItem
                     key={report._id}
@@ -363,8 +383,14 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
             
             {/* 分頁控制 */}
             {!loading && reports.length > 0 && (
-              <Flex justify="space-between" align="center" mt={4}>
-                <Text fontSize="sm" color="gray.500">
+              <Flex 
+                justify={{ base: 'center', md: 'space-between' }} 
+                align="center" 
+                mt={4}
+                direction={{ base: 'column', md: 'row' }}
+                gap={2}
+              >
+                <Text fontSize="sm" color="gray.500" display={{ base: 'none', md: 'block' }}>
                   顯示 {reports.length} 個結果，共 {pagination.total} 個
                 </Text>
                 
@@ -397,8 +423,17 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
             )}
           </ModalBody>
           
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+          <ModalFooter 
+            flexDirection={{ base: 'column', sm: 'row' }} 
+            gap={{ base: 2, sm: 0 }}
+          >
+            <Button 
+              variant="ghost" 
+              mr={{ base: 0, sm: 3 }} 
+              onClick={onClose}
+              width={{ base: '100%', sm: 'auto' }}
+              mb={{ base: 2, sm: 0 }}
+            >
               取消
             </Button>
             <Button
@@ -406,6 +441,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
               leftIcon={<FiCheck />}
               onClick={handleConfirm}
               isDisabled={!selectedReport}
+              width={{ base: '100%', sm: 'auto' }}
             >
               套用選擇的報告
             </Button>
@@ -418,9 +454,10 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
         isOpen={isDeleteAlertOpen}
         leastDestructiveRef={cancelRef}
         onClose={() => setIsDeleteAlertOpen(false)}
+        isCentered
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
+          <AlertDialogContent mx={{ base: 4, md: 'auto' }}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               刪除報告
             </AlertDialogHeader>
@@ -429,11 +466,24 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
               確定要刪除報告 "{reportToDelete?.name || '未命名報告'}" 嗎？此操作無法撤銷。
             </AlertDialogBody>
 
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setIsDeleteAlertOpen(false)}>
+            <AlertDialogFooter 
+              flexDirection={{ base: 'column', sm: 'row' }} 
+              gap={{ base: 2, sm: 0 }}
+            >
+              <Button 
+                ref={cancelRef} 
+                onClick={() => setIsDeleteAlertOpen(false)}
+                width={{ base: '100%', sm: 'auto' }}
+                mb={{ base: 2, sm: 0 }}
+              >
                 取消
               </Button>
-              <Button colorScheme="red" onClick={confirmDelete} ml={3}>
+              <Button 
+                colorScheme="red" 
+                onClick={confirmDelete} 
+                ml={{ base: 0, sm: 3 }}
+                width={{ base: '100%', sm: 'auto' }}
+              >
                 刪除
               </Button>
             </AlertDialogFooter>

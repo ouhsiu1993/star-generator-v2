@@ -12,7 +12,8 @@ import {
   FormLabel,
   Input,
   FormHelperText,
-  useToast
+  useToast,
+  Stack
 } from '@chakra-ui/react';
 import { FiSave } from 'react-icons/fi';
 import apiService from '../utils/apiService';
@@ -97,9 +98,14 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
       isOpen={isOpen} 
       onClose={handleClose}
       initialFocusRef={initialRef}
+      size={{ base: 'sm', md: 'md' }}
     >
       <ModalOverlay />
-      <ModalContent as="form" onSubmit={handleSubmit}>
+      <ModalContent 
+        as="form" 
+        onSubmit={handleSubmit}
+        mx={{ base: 4, md: 'auto' }}
+      >
         <ModalHeader>儲存報告</ModalHeader>
         <ModalCloseButton />
         
@@ -118,8 +124,13 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
           </FormControl>
         </ModalBody>
 
-        <ModalFooter>
-          <Button mr={3} onClick={handleClose}>
+        <ModalFooter flexDirection={{ base: 'column', sm: 'row' }} gap={{ base: 2, sm: 0 }}>
+          <Button 
+            mr={{ base: 0, sm: 3 }} 
+            onClick={handleClose}
+            width={{ base: '100%', sm: 'auto' }}
+            mb={{ base: 2, sm: 0 }}
+          >
             取消
           </Button>
           <Button 
@@ -128,6 +139,7 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
             leftIcon={<FiSave />}
             isLoading={isSaving}
             loadingText="儲存中..."
+            width={{ base: '100%', sm: 'auto' }}
           >
             儲存報告
           </Button>

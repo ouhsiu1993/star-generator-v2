@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { Box, VStack, Heading, Text, useToast, useColorModeValue } from '@chakra-ui/react';
+import { Box, VStack, Heading, Text, useToast, useColorModeValue, Container } from '@chakra-ui/react';
 import StoryForm from '../components/StoryForm';
 import StarReport from '../components/StarReport';
 import { AppContext } from '../App';
@@ -77,6 +77,14 @@ const Home = () => {
         isClosable: true,
         position: 'top',
       });
+      
+      // 報告生成後滾動到報告部分
+      setTimeout(() => {
+        window.scrollTo({ 
+          top: document.body.scrollHeight, 
+          behavior: 'smooth' 
+        });
+      }, 100);
     } catch (error) {
       console.error('Error generating report:', error);
       
@@ -126,36 +134,39 @@ const Home = () => {
   };
 
   return (
-    <VStack spacing={8} my={8} align="stretch" maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }} mx="auto">
-      <Box textAlign="center" mb={2}>
-        <Heading as="h2" size="xl" mb={4} color={useColorModeValue("gray.700", "white")}>
-          STAR 報告產生器
-        </Heading>
-        <Text 
-          fontSize="lg" 
-          color={useColorModeValue("gray.500", "gray.400")} 
-          maxW="container.md" 
-          mx="auto"
-          fontWeight="medium"
-        >
-          輸入故事內容讓 AI 自動生成
-        </Text>
-      </Box>
-      
-      <StoryForm 
-        ref={storyFormRef} 
-        onSubmit={generateReport} 
-        isLoading={isLoading} 
-        onStoryChange={handleStoryChange} 
-        onReportLoaded={handleReportLoaded}
-        currentReport={report} // 傳遞當前報告給表單
-      />
-      
-      {/* 使用 showReport 控制報告顯示 */}
-      {showReport && report && (
-        <StarReport report={report} onNewReport={resetForm} />
-      )}
-    </VStack>
+    <Container maxW={{ base: "100%", md: "container.md", lg: "container.lg" }} px={{ base: 2, md: 4 }}>
+      <VStack spacing={6} my={6} align="stretch">
+        <Box textAlign="center" mb={{ base: 0, md: 2 }}>
+          <Heading as="h2" size={{ base: "lg", md: "xl" }} mb={3} color={useColorModeValue("gray.700", "white")}>
+            STAR 報告產生器
+          </Heading>
+          <Text 
+            fontSize={{ base: "md", md: "lg" }} 
+            color={useColorModeValue("gray.500", "gray.400")} 
+            maxW="container.md" 
+            mx="auto"
+            fontWeight="medium"
+            px={2}
+          >
+            輸入職場鬼故事讓 AI 生成 STAR 報告
+          </Text>
+        </Box>
+        
+        <StoryForm 
+          ref={storyFormRef} 
+          onSubmit={generateReport} 
+          isLoading={isLoading} 
+          onStoryChange={handleStoryChange} 
+          onReportLoaded={handleReportLoaded}
+          currentReport={report} // 傳遞當前報告給表單
+        />
+        
+        {/* 使用 showReport 控制報告顯示 */}
+        {showReport && report && (
+          <StarReport report={report} onNewReport={resetForm} />
+        )}
+      </VStack>
+    </Container>
   );
 };
 

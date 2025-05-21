@@ -14,6 +14,7 @@ import {
   Select,
   Flex,
   useDisclosure,
+  Stack,
 } from '@chakra-ui/react';
 import { FiSend, FiFileText, FiTrash2, FiDownload } from 'react-icons/fi';
 import LoadReportsDialog from './LoadReportsDialog';
@@ -133,13 +134,17 @@ const StoryForm = React.forwardRef(({
   };
 
   const handleSampleStory = () => {
-    // 創建多個範例故事模板
+    // 創建多個範例故事模板，專為櫃姐和第一線業務人員設計
     const storyTemplates = [
-      `在去年，我負責一個客戶滿意度下降的問題。經調查發現，客戶抱怨我們的回應速度太慢。身為客服團隊主管，我重新設計了流程，建立分類系統，並實施每週培訓。三個月後，我們的回應時間減少了40%，客戶滿意度提高了25%，投訴數量下降了30%。管理層認可這些改進，並在全公司推廣我們的方法。`,
-      `在一個跨部門專案中，我們面臨著嚴重的時程延誤。作為專案經理，我首先分析了瓶頸，發現溝通不足是主要問題。我建立了每日15分鐘的站立會議，並導入了團隊協作工具。我還重新安排了任務優先順序，將專案分解為更小的里程碑。結果，我們不僅按時完成了專案，還比預算節省了12%的成本，客戶給予了極高的評價。`,
-      `我們公司的網站流量持續下降，作為數位行銷專員，我被指派解決這個問題。我首先進行了全面的數據分析，發現SEO策略過時是主要原因。我重新優化了網站內容、改進了關鍵字策略，並實施了內容行銷計劃。經過兩個月的努力，網站流量增加了35%，轉換率提高了15%，這直接帶來了20%的收入增長。`,
-      `在帶領一個新團隊時，我注意到團隊成員之間存在嚴重的協作問題。我首先進行了一對一面談，了解每個人的擔憂和建議。然後，我組織了團隊建設活動，明確了每個人的角色和責任，並建立了透明的績效評估系統。六個月後，團隊的協作能力大幅提升，項目完成速度加快了25%，員工滿意度從6.2分上升到8.7分。`,
-      `在一次系統升級中，我們面臨資料遷移的重大風險。作為技術負責人，我制定了詳細的風險評估和應急計劃，設計了嚴格的測試流程，並建立了回滾機制。在實施過程中，我們確實遇到了幾個未預見的問題，但由於準備充分，我們能夠快速解決而不影響用戶。最終，遷移成功完成，停機時間比計劃縮短了40%，零資料損失。`
+      `上個月，我們品牌推出新款香水時，我注意到許多顧客對於香調難以選擇。作為香水部門櫃姐，我主動整理了一份香調指南卡，並用精美瓶子製作了小樣供客人試聞。我還能根據顧客的穿著打扮和偏好，快速推薦最適合的香水。結果一個月內我的銷售額比目標高出30%，客戶回購率增加15%，主管還請我在部門會議分享我的銷售技巧。`,
+      
+      `去年春節檔期，我們化妝品專櫃人手不足，同時抱怨客多且等待時間長。身為資深櫃姐，我設計了一個快速諮詢流程，先詢問顧客的肌膚需求和預算，同時讓初級櫃姐負責結帳，我則專心做高端產品推薦和膚質解說。實施後，不僅客人等待時間減少60%，滿意度提高，櫃位銷售額也比去年同期增長了25%，成為商場內業績成長最快的專櫃。`,
+      
+      `在電子產品專區作為銷售顧問，我發現許多年長客人對數位產品有興趣但不敢嘗試。我主動為這類顧客設計了「數位生活體驗」專案，用淺顯的方式解說產品，甚至編寫簡易使用手冊給他們帶回家。我還建立了專屬Line群組，隨時為他們解答問題。三個月後，我的銀髮族客群增加了40%，他們帶來的銷售額成長了35%，讓我成為部門「最佳創新銷售」的獲獎者。`,
+      
+      `作為珠寶部門的銷售顧問，我發現很多男性客人來買禮物時顯得特別緊張無措。我開發了一套「禮物顧問」流程，從詢問收禮人的年齡、風格喜好、場合到預算，然後提供3個精準選項。我還會主動示範包裝、講解保養知識。這個方法讓我的男性客戶轉換率提高了45%，平均客單價增加20%，回頭率也比其他同事高出30%，讓主管指派我專門負責重要節日的男士購物諮詢。`,
+      
+      `在數位家電部門工作時，我發現顧客經常抱怨售後服務不佳。作為一線銷售，我主動建立了客戶資料庫，記錄每位客人購買的產品和喜好，設置提醒系統定期關懷，並主動學習產品維修知識。當客人有問題，我能在第一時間提供協助。半年後，我的客戶投訴率降低了70%，回頭客增加50%，許多顧客指名要我服務，並為我帶來更多轉介紹客人，使我連續三個月達成業績第一名。`
     ];
     
     // 隨機選擇一個故事模板
@@ -159,7 +164,7 @@ const StoryForm = React.forwardRef(({
       onSubmit={handleSubmit} 
       bg={bgColor} 
       borderRadius="lg" 
-      p={6}
+      p={{ base: 4, md: 6 }}
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow="sm"
@@ -167,8 +172,11 @@ const StoryForm = React.forwardRef(({
       maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }} // 響應式最大寬度
     >
       <VStack spacing={4} align="stretch">
-        {/* 載入報告按鈕 */}
-        <Flex justify="flex-end">
+        {/* 載入報告按鈕 - 優化 RWD */}
+        <Flex 
+          justify={{ base: "center", sm: "flex-end" }}
+          mb={{ base: 2, sm: 0 }}
+        >
           <Button
             leftIcon={<FiDownload />}
             size="md" 
@@ -176,6 +184,7 @@ const StoryForm = React.forwardRef(({
             colorScheme="teal"
             isDisabled={isLoading} // 只在加載時禁用
             onClick={onOpen}
+            width={{ base: "100%", sm: "auto" }}
           >
             載入報告
           </Button>
@@ -221,7 +230,7 @@ const StoryForm = React.forwardRef(({
       
         <FormControl isRequired isInvalid={isOverLimit}>
           <FormLabel fontSize="lg" fontWeight="medium" color={useColorModeValue("gray.700", "white")}>
-            輸入你的職場故事
+            輸入你的故事
             <Badge ml={2} colorScheme={charsLeft < 50 ? (charsLeft < 0 ? 'red' : 'yellow') : 'green'}>
               {charsLeft} 字剩餘
             </Badge>
@@ -247,14 +256,26 @@ const StoryForm = React.forwardRef(({
           )}
         </FormControl>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-          <HStack spacing={2}>
+        {/* 更新後的按鈕佈局 - 使用 Stack 自動適應不同設備 */}
+        <Stack 
+          direction={{ base: 'column', md: 'row' }} 
+          spacing={{ base: 2, md: 4 }} 
+          justify="space-between" 
+          align={{ base: 'stretch', md: 'center' }} 
+          mt={2}
+        >
+          <Stack 
+            direction={{ base: 'column', sm: 'row' }} 
+            spacing={2} 
+            width={{ base: '100%', md: 'auto' }}
+          >
             <Button
               leftIcon={<FiFileText />}
               variant="outline"
               onClick={handleSampleStory}
               size="md"
               isDisabled={isLoading} // 只在加載時禁用
+              width={{ base: '100%', sm: 'auto' }}
             >
               載入範本
             </Button>
@@ -265,10 +286,11 @@ const StoryForm = React.forwardRef(({
               size="md"
               colorScheme="red"
               isDisabled={story.trim() === '' || isLoading} // 只在加載時或內容為空時禁用
+              width={{ base: '100%', sm: 'auto' }}
             >
               清除內容
             </Button>
-          </HStack>
+          </Stack>
           <Button
             type="submit"
             leftIcon={<FiSend />}
@@ -278,10 +300,12 @@ const StoryForm = React.forwardRef(({
             isDisabled={story.trim() === '' || isOverLimit || !competency || !storeCategory || isLoading}
             // 只在必要條件不滿足或加載時禁用
             size="md"
+            width={{ base: '100%', md: 'auto' }}
+            mt={{ base: 2, md: 0 }} // 在行動裝置上增加上邊距
           >
             生成STAR報告
           </Button>
-        </Box>
+        </Stack>
       </VStack>
 
       {/* 載入報告對話框 */}

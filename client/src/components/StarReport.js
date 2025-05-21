@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import {
   Box,
   Heading,
@@ -20,6 +20,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   useDisclosure,
+  Stack,
 } from '@chakra-ui/react';
 import { FiCopy, FiSave, FiCheck } from 'react-icons/fi';
 import { AppContext } from '../App';
@@ -59,36 +60,40 @@ const StarReport = ({ report, onNewReport }) => {
 
   // 打開儲存報告對話框
   const handleSaveClick = () => {
-    if (isSaved) {
-      toast({
-        title: "報告已儲存",
-        description: "此報告已成功儲存",
-        status: "info",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
-      return;
-    }
-    
+    // 移除條件檢查，讓使用者可以隨時打開保存對話框
     onOpen();
   };
   
-  // 儲存成功的回調
+  // 儲存成功的回調 - 修改為顯示短暫的打勾後恢復
   const handleSaveSuccess = () => {
+    // 設置為已保存狀態
     setIsSaved(true);
+    
+    // 顯示成功提示
+    toast({
+      title: "報告儲存成功",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+    
+    // 2秒後恢復為未保存狀態
+    setTimeout(() => {
+      setIsSaved(false);
+    }, 2000);
   };
   
-// 返回頂部並重置
-const handleReturn = () => {
-  setIsAlertOpen(false);
-  setHasContent(false); // 重置全局內容狀態
-  if (onNewReport) {
-    onNewReport(); // 呼叫父組件提供的回調函數，這將隱藏整個報告區塊
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
+  // 返回頂部並重置
+  const handleReturn = () => {
+    setIsAlertOpen(false);
+    setHasContent(false); // 重置全局內容狀態
+    if (onNewReport) {
+      onNewReport(); // 呼叫父組件提供的回調函數，這將隱藏整個報告區塊
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // 報告區段組件
   const ReportSection = ({ title, content, color, badge }) => (
@@ -106,7 +111,7 @@ const handleReturn = () => {
         borderRadius="md"
         boxShadow="sm"
       >
-        <Text fontSize="md">{content}</Text>
+        <Text fontSize={{ base: 'sm', md: 'md' }}>{content}</Text>
       </Box>
     </Box>
   );
@@ -116,19 +121,34 @@ const handleReturn = () => {
       ref={reportRef}
       bg={bgColor}
       borderRadius="lg"
-      p={6}
+      p={{ base: 4, md: 6 }}
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow="md"
       position="relative"
       mt={6}
     >
-      <VStack spacing={6} align="stretch">
-        <Flex justify="space-between" align="center">
-          <Heading as="h3" size="lg" color={useColorModeValue("gray.700", "white")}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+        <Flex 
+          justify={{ base: 'space-between', md: 'space-between' }} 
+          align="center"
+          direction={{ base: 'column', sm: 'row' }}
+          gap={{ base: 2, sm: 0 }}
+        >
+          <Heading 
+            as="h3" 
+            size={{ base: 'md', md: 'lg' }} 
+            color={useColorModeValue("gray.700", "white")}
+            mb={{ base: 2, sm: 0 }}
+          >
             STAR 報告
           </Heading>
-          <HStack spacing={2}>
+          <Stack 
+            direction="row" 
+            spacing={2}
+            justify={{ base: 'center', sm: 'flex-end' }}
+            width={{ base: '100%', sm: 'auto' }}
+          >
             <Tooltip hasArrow label="複製報告" placement="top">
               <IconButton
                 icon={<FiCopy />}
@@ -146,7 +166,7 @@ const handleReturn = () => {
                 colorScheme={isSaved ? "green" : "blue"}
               />
             </Tooltip>
-          </HStack>
+          </Stack>
         </Flex>
 
         <Divider />
@@ -187,6 +207,7 @@ const handleReturn = () => {
             size="md"
             variant="outline"
             mt={2}
+            width={{ base: '100%', sm: 'auto' }}
           >
             創建新報告
           </Button>
@@ -200,7 +221,7 @@ const handleReturn = () => {
         onClose={() => setIsAlertOpen(false)}
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
+          <AlertDialogContent mx={{ base: 4, md: 0 }}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               創建新報告
             </AlertDialogHeader>
