@@ -12,8 +12,9 @@ import {
   useColorModeValue,
   HStack,
   Select,
+  Flex,
 } from '@chakra-ui/react';
-import { FiSend, FiFileText, FiTrash2 } from 'react-icons/fi';
+import { FiSend, FiFileText, FiTrash2, FiDownload } from 'react-icons/fi';
 
 const MAX_CHARS = 300;
 
@@ -142,6 +143,19 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
       boxShadow="sm"
     >
       <VStack spacing={4} align="stretch">
+        {/* 載入報告按鈕 */}
+        <Flex justify="flex-end">
+          <Button
+            leftIcon={<FiDownload />}
+            size="sm"
+            variant="outline"
+            colorScheme="teal"
+            isDisabled={isLoading || isDisabled}
+          >
+            載入報告
+          </Button>
+        </Flex>
+        
         <FormControl isRequired>
           <FormLabel fontSize="md" fontWeight="medium" color={useColorModeValue("gray.700", "white")}>
             請選擇核心職能
