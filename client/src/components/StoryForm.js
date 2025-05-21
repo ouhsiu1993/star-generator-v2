@@ -21,7 +21,13 @@ import { getCompetencyOptions, getStoreCategoryOptions } from '../utils/formatte
 
 const MAX_CHARS = 300;
 
-const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisabled = false, onReportLoaded }, ref) => {
+const StoryForm = React.forwardRef(({ 
+  onSubmit, 
+  isLoading, 
+  onStoryChange, 
+  onReportLoaded,
+  currentReport // 新增當前報告屬性
+}, ref) => {
   const formRef = useRef(null);
   const [story, setStory] = useState('');
   const [competency, setCompetency] = useState('');
@@ -35,6 +41,28 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
   // 獲取選項
   const competencyOptions = getCompetencyOptions(false); // 不包含空選項
   const storeCategoryOptions = getStoreCategoryOptions(false); // 不包含空選項
+  
+  // 當報告變化時更新表單欄位
+  useEffect(() => {
+    if (currentReport) {
+      // 如果報告包含原始故事，填充故事欄位
+      if (currentReport.originalStory) {
+        setStory(currentReport.originalStory);
+        if (onStoryChange) {
+          onStoryChange(currentReport.originalStory);
+        }
+      }
+      
+      // 填充核心職能和商店類別
+      if (currentReport.competency) {
+        setCompetency(currentReport.competency);
+      }
+      
+      if (currentReport.storeCategory) {
+        setStoreCategory(currentReport.storeCategory);
+      }
+    }
+  }, [currentReport, onStoryChange]);
   
   // 暴露重置方法給外部
   React.useImperativeHandle(ref, () => ({
@@ -89,10 +117,10 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
     resetFormInternal();
   };
 
-  // 確保提交表單時考慮禁用狀態
+  // 提交表單
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (story.trim() && !isOverLimit && !isDisabled && !isLoading && competency && storeCategory) {
+    if (story.trim() && !isOverLimit && !isLoading && competency && storeCategory) {
       onSubmit(story, competency, storeCategory);
     }
   };
@@ -140,18 +168,18 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
     >
       <VStack spacing={4} align="stretch">
         {/* 載入報告按鈕 */}
-<Flex justify="flex-end">
-  <Button
-    leftIcon={<FiDownload />}
-    size="md" // 從 sm 改為 md，使按鈕更大
-    variant="outline"
-    colorScheme="teal"
-    isDisabled={isLoading} // 移除 isDisabled 條件，使報告生成後按鈕也可用
-    onClick={onOpen}
-  >
-    載入報告
-  </Button>
-</Flex>
+        <Flex justify="flex-end">
+          <Button
+            leftIcon={<FiDownload />}
+            size="md" 
+            variant="outline"
+            colorScheme="teal"
+            isDisabled={isLoading} // 只在加載時禁用
+            onClick={onOpen}
+          >
+            載入報告
+          </Button>
+        </Flex>
         
         <FormControl isRequired>
           <FormLabel fontSize="md" fontWeight="medium" color={useColorModeValue("gray.700", "white")}>
@@ -161,7 +189,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             placeholder="請選擇核心職能"
             value={competency}
             onChange={handleCompetencyChange}
-            isDisabled={isLoading || isDisabled}
+            isDisabled={isLoading} // 只在加載時禁用
             size="md"
           >
             {competencyOptions.map((option) => (
@@ -180,7 +208,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             placeholder="請選擇商店類別"
             value={storeCategory}
             onChange={handleStoreCategoryChange}
-            isDisabled={isLoading || isDisabled}
+            isDisabled={isLoading} // 只在加載時禁用
             size="md"
           >
             {storeCategoryOptions.map((option) => (
@@ -206,7 +234,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
             rows={8}
             resize="vertical"
             maxLength={MAX_CHARS + 10} // 允許稍微超過一點，但會顯示警告
-            isDisabled={isLoading || isDisabled}
+            isDisabled={isLoading} // 只在加載時禁用
           />
           {isOverLimit ? (
             <FormHelperText color="red.500">
@@ -226,7 +254,7 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
               variant="outline"
               onClick={handleSampleStory}
               size="md"
-              isDisabled={isLoading || isDisabled}
+              isDisabled={isLoading} // 只在加載時禁用
             >
               產生隨機故事
             </Button>
@@ -236,22 +264,23 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
               onClick={handleClear}
               size="md"
               colorScheme="red"
-              isDisabled={story.trim() === '' || isLoading || isDisabled}
+              isDisabled={story.trim() === '' || isLoading} // 只在加載時或內容為空時禁用
             >
               清除內容
             </Button>
           </HStack>
-<Button
-  type="submit"
-  leftIcon={<FiSend />}
-  colorScheme="blue"
-  isLoading={isLoading}
-  loadingText="生成中..."
-  isDisabled={story.trim() === '' || isOverLimit || isDisabled || !competency || !storeCategory}
-  size="md" // 從 lg 改為 md，使按鈕與其他按鈕大小一致
->
-  生成STAR報告
-</Button>
+          <Button
+            type="submit"
+            leftIcon={<FiSend />}
+            colorScheme="blue"
+            isLoading={isLoading}
+            loadingText="生成中..."
+            isDisabled={story.trim() === '' || isOverLimit || !competency || !storeCategory || isLoading}
+            // 只在必要條件不滿足或加載時禁用
+            size="md"
+          >
+            生成STAR報告
+          </Button>
         </Box>
       </VStack>
 

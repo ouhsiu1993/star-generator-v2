@@ -79,16 +79,16 @@ const StarReport = ({ report, onNewReport }) => {
     setIsSaved(true);
   };
   
-  // 返回頂部並重置
-  const handleReturn = () => {
-    setIsAlertOpen(false);
-    setHasContent(false); // 重置全局內容狀態
-    if (onNewReport) {
-      onNewReport(); // 呼叫父組件提供的回調函數
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+// 返回頂部並重置
+const handleReturn = () => {
+  setIsAlertOpen(false);
+  setHasContent(false); // 重置全局內容狀態
+  if (onNewReport) {
+    onNewReport(); // 呼叫父組件提供的回調函數，這將隱藏整個報告區塊
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
 
   // 報告區段組件
   const ReportSection = ({ title, content, color, badge }) => (

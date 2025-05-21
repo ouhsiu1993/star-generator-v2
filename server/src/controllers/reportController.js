@@ -243,12 +243,18 @@ const saveReport = async (req, res) => {
  */
 const getReports = async (req, res) => {
   try {
-    const { competency, storeCategory, limit = 10, page = 1 } = req.query;
+    const { competency, storeCategory, name, limit = 10, page = 1 } = req.query;
     
     // 構建查詢條件
     const query = {};
     if (competency) query.competency = competency;
     if (storeCategory) query.storeCategory = storeCategory;
+    
+    // 新增: 如果提供了 name 參數，添加名稱模糊查詢
+    if (name && name.trim() !== '') {
+      // 使用正則表達式進行不區分大小寫的模糊查詢
+      query.name = { $regex: name.trim(), $options: 'i' };
+    }
     
     // 計算跳過的文檔數量
     const skip = (page - 1) * limit;

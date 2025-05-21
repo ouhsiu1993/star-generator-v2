@@ -26,7 +26,10 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogBody,
-  AlertDialogFooter
+  AlertDialogFooter,
+  Input,
+  InputGroup,
+  InputLeftElement
 } from '@chakra-ui/react';
 import { FiSearch, FiCheck, FiChevronLeft, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import apiService from '../utils/apiService';
@@ -57,12 +60,6 @@ const ReportItem = ({ report, onSelect, onDelete, isSelected }) => {
       borderColor={isSelected ? 'blue.500' : 'transparent'}
       position="relative"
     >
-      {isSelected && (
-        <Box position="absolute" top="10px" right="10px">
-          <Badge colorScheme="blue">已選擇</Badge>
-        </Box>
-      )}
-      
       <VStack align="start" spacing={2}>
         <Flex width="100%" justify="space-between" wrap="wrap">
           <HStack spacing={2}>
@@ -100,6 +97,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
   const [filters, setFilters] = useState({
     competency: '',
     storeCategory: '',
+    name: '' // 新增報告名稱過濾
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -260,6 +258,18 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
   const applyFilters = () => {
     loadReports();
   };
+
+  // 處理名稱輸入變化
+  const handleNameInputChange = (e) => {
+    handleFilterChange('name', e.target.value);
+  };
+  
+  // 處理按下 Enter 鍵
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      applyFilters();
+    }
+  };
   
   return (
     <>
@@ -270,8 +280,21 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
           <ModalCloseButton />
           
           <ModalBody>
-            {/* 過濾選項 */}
+            {/* 搜尋欄位 */}
             <VStack spacing={4} align="stretch" mb={4}>
+              {/* 新增報告名稱搜尋欄位 */}
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <FiSearch color="gray.300" />
+                </InputLeftElement>
+                <Input 
+                  placeholder="搜尋報告名稱" 
+                  value={filters.name}
+                  onChange={handleNameInputChange}
+                  onKeyDown={handleKeyDown}
+                />
+              </InputGroup>
+              
               <Flex gap={4} wrap="wrap">
                 <Box flex="1" minW="200px">
                   <Select
