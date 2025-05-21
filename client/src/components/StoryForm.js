@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   VStack,
@@ -26,11 +26,43 @@ const coreCompetencies = [
   { value: "teamwork", label: "團隊共贏" }
 ];
 
-const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) => {
+const storeCategories = [
+  { value: "", label: "請選擇商店類別" },
+  { value: "skincare", label: "保養" },
+  { value: "makeup", label: "彩妝" },
+  { value: "fragrance", label: "香水香氛" },
+  { value: "women_luxury", label: "女仕精品" },
+  { value: "men_luxury", label: "男仕精品" },
+  { value: "digital", label: "數位家電" },
+  { value: "toys", label: "玩具" },
+  { value: "home", label: "居家生活" },
+  { value: "souvenir", label: "伴手禮" },
+  { value: "tobacco_alcohol", label: "菸酒" }
+];
+
+const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisabled = false }, ref) => {
+  const formRef = useRef(null);
   const [story, setStory] = useState('');
   const [competency, setCompetency] = useState('');
+  const [storeCategory, setStoreCategory] = useState('');
   const charsLeft = MAX_CHARS - story.length;
   const isOverLimit = charsLeft < 0;
+  
+  // 暴露重置方法給外部
+  React.useImperativeHandle(ref, () => ({
+    resetForm: () => {
+      setStory('');
+      setCompetency('');
+      setStoreCategory('');
+      if (onStoryChange) {
+        onStoryChange('');
+      }
+      // 如果有表單引用，重置 HTML 表單元素
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    }
+  }));
   
   const bgColor = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -45,20 +77,35 @@ const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) =
   const handleCompetencyChange = (e) => {
     setCompetency(e.target.value);
   };
+  
+  const handleStoreCategoryChange = (e) => {
+    setStoreCategory(e.target.value);
+  };
 
-  const handleClear = () => {
+  // 完全重置表單的函數 (內部使用)
+  const resetFormInternal = () => {
     setStory('');
     setCompetency('');
+    setStoreCategory('');
     if (onStoryChange) {
       onStoryChange('');
     }
+    // 如果有表單引用，重置 HTML 表單元素
+    if (formRef.current) {
+      formRef.current.reset();
+    }
+  };
+
+  // 清除按鈕處理函數
+  const handleClear = () => {
+    resetFormInternal();
   };
 
   // 確保提交表單時考慮禁用狀態
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (story.trim() && !isOverLimit && !isDisabled && !isLoading && competency) {
-      onSubmit(story, competency);
+    if (story.trim() && !isOverLimit && !isDisabled && !isLoading && competency && storeCategory) {
+      onSubmit(story, competency, storeCategory);
     }
   };
 
@@ -85,6 +132,7 @@ const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) =
   return (
     <Box 
       as="form" 
+      ref={formRef}
       onSubmit={handleSubmit} 
       bg={bgColor} 
       borderRadius="lg" 
@@ -106,6 +154,25 @@ const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) =
             size="md"
           >
             {coreCompetencies.slice(1).map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+        
+        <FormControl isRequired>
+          <FormLabel fontSize="md" fontWeight="medium" color={useColorModeValue("gray.700", "white")}>
+            請選擇商店類別
+          </FormLabel>
+          <Select 
+            placeholder="請選擇商店類別"
+            value={storeCategory}
+            onChange={handleStoreCategoryChange}
+            isDisabled={isLoading || isDisabled}
+            size="md"
+          >
+            {storeCategories.slice(1).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -169,7 +236,7 @@ const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) =
             colorScheme="blue"
             isLoading={isLoading}
             loadingText="生成中..."
-            isDisabled={story.trim() === '' || isOverLimit || isDisabled || !competency}
+            isDisabled={story.trim() === '' || isOverLimit || isDisabled || !competency || !storeCategory}
             size="lg"
           >
             生成STAR報告
@@ -178,6 +245,6 @@ const StoryForm = ({ onSubmit, isLoading, onStoryChange, isDisabled = false }) =
       </VStack>
     </Box>
   );
-};
+})
 
 export default StoryForm;
