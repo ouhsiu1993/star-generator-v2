@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // MongoDB 連接字符串
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ouhsiu:oyMifOpfCI9cLskQ@star-generator.m9o5sl8.mongodb.net/?retryWrites=true&w=majority&appName=star-generator';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/star-generator';
 
 // 連接配置
 const options = {
@@ -18,7 +18,12 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`MongoDB 連接錯誤: ${error.message}`);
-    process.exit(1);
+    // 不要在生產環境中退出進程，可以繼續提供服務，只是無法存儲數據
+    if (process.env.NODE_ENV === 'production') {
+      console.error('繼續提供服務，但無法儲存報告');
+    } else {
+      process.exit(1);
+    }
   }
 };
 

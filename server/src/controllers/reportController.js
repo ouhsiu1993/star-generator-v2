@@ -10,6 +10,8 @@ const Report = require('../models/Report');
 const generateStarReport = async (req, res) => {
   try {
     const { story, competency, storeCategory } = req.body;
+    
+    console.log('接收到的請求數據:', { story, competency, storeCategory });
 
     // 驗證是否提供了所有必要參數
     if (!story || !competency || !storeCategory) {
@@ -21,57 +23,145 @@ const generateStarReport = async (req, res) => {
 
     // 生成提示詞
     const prompt = generateStarPrompt(story, competency, storeCategory);
+    console.log('生成的提示詞:', prompt);
 
     // 調用 OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: config.model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 1000,
-      top_p: 1.0,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-    });
-
-    // 解析 API 響應
-    const responseContent = completion.choices[0]?.message?.content || '';
-    
-    // 嘗試將 JSON 字符串解析為對象
     try {
-      const reportData = JSON.parse(responseContent);
+      console.log('使用模型:', config.model);
       
-      // 驗證 reportData 是否包含預期的屬性
-      if (!reportData.situation || !reportData.task || !reportData.action || !reportData.result) {
-        throw new Error('OpenAI 回應格式不正確');
+      const completion = await openai.chat.completions.create({
+        model: config.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1000,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0,
+      });
+
+      console.log('OpenAI API 響應:', completion);
+      
+      // 解析 API 響應
+      const responseContent = completion.choices[0]?.message?.content || '';
+      
+      console.log('獲得的內容:', responseContent);
+      
+      // 嘗試將 JSON 字符串解析為對象
+      try {
+        const reportData = JSON.parse(responseContent);
+        
+        // 驗證 reportData 是否包含預期的屬性
+        if (!reportData.situation || !reportData.task || !reportData.action || !reportData.result) {
+          throw new Error('OpenAI 回應格式不正確');
+        }
+        
+        // 添加原始故事和類別信息到報告數據中
+        reportData.originalStory = story;
+        reportData.competency = competency;
+        reportData.storeCategory = storeCategory;
+        
+        // 返回成功響應
+        return res.status(200).json({
+          success: true,
+          data: reportData
+        });
+      } catch (jsonError) {
+        console.error('JSON 解析錯誤:', jsonError);
+        console.error('嘗試解析的內容:', responseContent);
+        
+        // 嘗試使用正則表達式提取 STAR 內容
+        const situationMatch = responseContent.match(/\"situation\":\s*\"(.*?)\"/);
+        const taskMatch = responseContent.match(/\"task\":\s*\"(.*?)\"/);
+        const actionMatch = responseContent.match(/\"action\":\s*\"(.*?)\"/);
+        const resultMatch = responseContent.match(/\"result\":\s*\"(.*?)\"/);
+
+        // 如果可以通過正則提取內容
+        if (situationMatch && taskMatch && actionMatch && resultMatch) {
+          const extractedData = {
+            situation: situationMatch[1],
+            task: taskMatch[1],
+            action: actionMatch[1],
+            result: resultMatch[1],
+            competency,
+            storeCategory,
+            originalStory: story
+          };
+          
+          console.log('通過正則提取的數據:', extractedData);
+          
+          return res.status(200).json({
+            success: true,
+            data: extractedData
+          });
+        }
+        
+        // 如果不是有效的 JSON，嘗試以簡單格式返回
+        return res.status(200).json({
+          success: true,
+          data: {
+            situation: responseContent.substring(0, 100),
+            task: responseContent.substring(100, 200),
+            action: responseContent.substring(200, 300),
+            result: responseContent.substring(300, 400),
+            competency,
+            storeCategory,
+            originalStory: story
+          },
+          rawResponse: responseContent
+        });
       }
+    } catch (openaiError) {
+      console.error('OpenAI API 調用錯誤:', openaiError);
       
-      // 添加原始故事和類別信息到報告數據中
-      reportData.originalStory = story;
-      reportData.competency = competency;
-      reportData.storeCategory = storeCategory;
-      
-      // 返回成功響應
-      return res.status(200).json({
-        success: true,
-        data: reportData
-      });
-    } catch (jsonError) {
-      console.error('JSON 解析錯誤:', jsonError);
-      
-      // 如果不是有效的 JSON，嘗試以簡單格式返回
-      return res.status(200).json({
-        success: true,
-        data: {
-          situation: responseContent.substring(0, 100),
-          task: responseContent.substring(100, 200),
-          action: responseContent.substring(200, 300),
-          result: responseContent.substring(300, 400),
-          competency,
-          storeCategory,
-          originalStory: story
-        },
-        rawResponse: responseContent
-      });
+      // 檢查是否是模型不存在的錯誤
+      if (openaiError.message && openaiError.message.includes('does not exist')) {
+        // 使用備用模型
+        console.log('嘗試使用備用模型');
+        const backupModel = 'gpt-4.0';
+        
+        const completion = await openai.chat.completions.create({
+          model: backupModel,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 1000,
+          top_p: 1.0,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
+        });
+        
+        const responseContent = completion.choices[0]?.message?.content || '';
+        
+        try {
+          const reportData = JSON.parse(responseContent);
+          reportData.originalStory = story;
+          reportData.competency = competency;
+          reportData.storeCategory = storeCategory;
+          
+          return res.status(200).json({
+            success: true,
+            data: reportData,
+            note: '使用備用模型生成'
+          });
+        } catch (jsonError) {
+          // 同樣的問題，返回簡單格式
+          return res.status(200).json({
+            success: true,
+            data: {
+              situation: responseContent.substring(0, 100),
+              task: responseContent.substring(100, 200),
+              action: responseContent.substring(200, 300),
+              result: responseContent.substring(300, 400),
+              competency,
+              storeCategory,
+              originalStory: story
+            },
+            rawResponse: responseContent,
+            note: '使用備用模型生成，但需要手動解析'
+          });
+        }
+      } else {
+        throw openaiError;
+      }
     }
   } catch (error) {
     console.error('生成 STAR 報告錯誤:', error);
