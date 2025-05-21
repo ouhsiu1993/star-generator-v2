@@ -9,7 +9,8 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Button,
-  useDisclosure
+  useDisclosure,
+  Container
 } from '@chakra-ui/react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -79,7 +80,7 @@ function App() {
     }}>
       <Box minH="100vh" bg={bgColor} display="flex" flexDirection="column">
         <Header />
-        <Box as="main" maxW="container.xl" mx="auto" p={4} flex="1">
+        <Box as="main" flex="1" px={4}>
           <Home />
         </Box>
         <Footer />

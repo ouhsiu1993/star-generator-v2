@@ -135,6 +135,8 @@ const StoryForm = React.forwardRef(({ onSubmit, isLoading, onStoryChange, isDisa
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow="sm"
+      width="100%" // 確保始終佔滿容器寬度
+      maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }} // 響應式最大寬度
     >
       <VStack spacing={4} align="stretch">
         {/* 載入報告按鈕 */}

@@ -115,7 +115,7 @@ const Home = () => {
   };
 
   return (
-    <VStack spacing={8} my={8} align="stretch">
+    <VStack spacing={8} my={8} align="stretch" maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }} mx="auto">
       <Box textAlign="center" mb={2}>
         <Heading as="h2" size="xl" mb={4} color={useColorModeValue("gray.700", "white")}>
           STAR 報告產生器
