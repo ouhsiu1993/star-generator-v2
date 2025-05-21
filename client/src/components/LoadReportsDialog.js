@@ -148,6 +148,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
         status: 'error',
         duration: 3000,
         isClosable: true,
+        position: "top",
       });
     } finally {
       setLoading(false);
@@ -191,6 +192,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
         status: 'warning',
         duration: 2000,
         isClosable: true,
+        position: "top",
       });
     }
   };
@@ -223,6 +225,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
           status: 'success',
           duration: 2000,
           isClosable: true,
+          position: "top",
         });
       } else {
         throw new Error(response.error || '刪除失敗');
@@ -235,6 +238,7 @@ const LoadReportsDialog = ({ isOpen, onClose, onReportSelect }) => {
         status: 'error',
         duration: 3000,
         isClosable: true,
+        position: "top",
       });
     } finally {
       setIsDeleteAlertOpen(false);

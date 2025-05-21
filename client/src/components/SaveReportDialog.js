@@ -34,6 +34,7 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
         status: "warning",
         duration: 2000,
         isClosable: true,
+        position: "top",
       });
       return;
     }
@@ -63,6 +64,7 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
           status: "success",
           duration: 2000,
           isClosable: true,
+          position: "top",
         });
         
         // 關閉對話框並通知父組件
@@ -81,6 +83,7 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
         status: "error",
         duration: 3000,
         isClosable: true,
+        position: "top",
       });
     } finally {
       setIsSaving(false);
@@ -93,6 +96,7 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
     onClose();
   };
 
+  // 禁用原生表單驗證的方式是添加 noValidate 屬性
   return (
     <Modal 
       isOpen={isOpen} 
@@ -105,12 +109,13 @@ const SaveReportDialog = ({ isOpen, onClose, report, onSaveSuccess }) => {
         as="form" 
         onSubmit={handleSubmit}
         mx={{ base: 4, md: 'auto' }}
+        noValidate
       >
         <ModalHeader>儲存報告</ModalHeader>
         <ModalCloseButton />
         
         <ModalBody>
-          <FormControl isRequired>
+          <FormControl>
             <FormLabel>報告名稱</FormLabel>
             <Input 
               ref={initialRef}
