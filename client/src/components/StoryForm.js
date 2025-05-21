@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   VStack,
@@ -65,22 +65,20 @@ const StoryForm = React.forwardRef(({
     }
   }, [currentReport, onStoryChange]);
   
-  // 清除表單的函數 - 修改為使用函數式寫法
-  const resetForm = useCallback(() => {
-    // 直接設置為空值
-    setStory('');
-    setCompetency('');
-    setStoreCategory('');
-    
-    // 通知父組件故事已更新
-    if (onStoryChange) {
-      onStoryChange('');
-    }
-  }, [onStoryChange]);
-  
   // 暴露重置方法給外部
   React.useImperativeHandle(ref, () => ({
-    resetForm
+    resetForm: () => {
+      setStory('');
+      setCompetency('');
+      setStoreCategory('');
+      if (onStoryChange) {
+        onStoryChange('');
+      }
+      // 如果有表單引用，重置 HTML 表單元素
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    }
   }));
   
   const bgColor = useColorModeValue('white', 'gray.700');
@@ -101,21 +99,24 @@ const StoryForm = React.forwardRef(({
     setStoreCategory(e.target.value);
   };
 
-  // 清除按鈕處理函數 - 改進版
-  const handleClear = useCallback(() => {
-    // 使用函數式設置狀態確保所有字段都被清除
+  // 完全重置表單的函數 (內部使用)
+  const resetFormInternal = () => {
     setStory('');
     setCompetency('');
     setStoreCategory('');
-    
-    // 確保父組件知道故事已更新
     if (onStoryChange) {
       onStoryChange('');
     }
-    
-    // 由於React的控制組件模式，不需要手動操作DOM
-    // React會根據state來自動更新UI
-  }, [onStoryChange]);
+    // 如果有表單引用，重置 HTML 表單元素
+    if (formRef.current) {
+      formRef.current.reset();
+    }
+  };
+
+  // 清除按鈕處理函數
+  const handleClear = () => {
+    resetFormInternal();
+  };
 
   // 提交表單
   const handleSubmit = (e) => {
@@ -150,7 +151,6 @@ const StoryForm = React.forwardRef(({
     const randomIndex = Math.floor(Math.random() * storyTemplates.length);
     const selectedStory = storyTemplates[randomIndex];
     
-    // 直接設置，避免使用setState後的中間狀態
     setStory(selectedStory);
     if (onStoryChange) {
       onStoryChange(selectedStory);
@@ -285,7 +285,7 @@ const StoryForm = React.forwardRef(({
               onClick={handleClear}
               size="md"
               colorScheme="red"
-              isDisabled={story === '' && competency === '' && storeCategory === '' || isLoading} // 修改條件：只有全部都空時才禁用
+              isDisabled={story.trim() === '' || isLoading} // 只在加載時或內容為空時禁用
               width={{ base: '100%', sm: 'auto' }}
             >
               清除內容
