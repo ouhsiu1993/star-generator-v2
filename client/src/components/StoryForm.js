@@ -1,3 +1,5 @@
+// 修復 client/src/components/StoryForm.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
@@ -27,7 +29,7 @@ const StoryForm = React.forwardRef(({
   isLoading, 
   onStoryChange, 
   onReportLoaded,
-  currentReport // 新增當前報告屬性
+  currentReport
 }, ref) => {
   const formRef = useRef(null);
   const [story, setStory] = useState('');
@@ -40,39 +42,48 @@ const StoryForm = React.forwardRef(({
   const { isOpen, onOpen, onClose } = useDisclosure();
   
   // 獲取選項
-  const competencyOptions = getCompetencyOptions(false); // 不包含空選項
-  const storeCategoryOptions = getStoreCategoryOptions(false); // 不包含空選項
+  const competencyOptions = getCompetencyOptions(false);
+  const storeCategoryOptions = getStoreCategoryOptions(false);
   
-  // 當報告變化時更新表單欄位
+  // 🔧 修復：移除自動覆蓋邏輯，只在真正需要時才填充表單
+  // 這個 useEffect 只處理故事內容，不觸碰 select 的值
   useEffect(() => {
-    if (currentReport) {
-      // 如果報告包含原始故事，填充故事欄位
-      if (currentReport.originalStory) {
-        setStory(currentReport.originalStory);
-        if (onStoryChange) {
-          onStoryChange(currentReport.originalStory);
-        }
-      }
-      
-      // 填充核心職能和商店類別
-      if (currentReport.competency) {
-        setCompetency(currentReport.competency);
-      }
-      
-      if (currentReport.storeCategory) {
-        setStoreCategory(currentReport.storeCategory);
+    if (currentReport && currentReport.originalStory && story === '') {
+      // 只在表單為空時才自動填充故事
+      setStory(currentReport.originalStory);
+      if (onStoryChange) {
+        onStoryChange(currentReport.originalStory);
       }
     }
-  }, [currentReport, onStoryChange]);
+  }, [currentReport, onStoryChange, story]);
   
   // 暴露重置方法給外部
   React.useImperativeHandle(ref, () => ({
     resetForm: () => {
       setStory('');
+      setCompetency('');
+      setStoreCategory('');
       if (onStoryChange) {
         onStoryChange('');
       }
-      // 注意：這裡不再重置核心職能和商店類別
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    },
+    // 🔧 新增：專門用於載入報告的方法
+    loadReport: (report) => {
+      if (report.originalStory) {
+        setStory(report.originalStory);
+        if (onStoryChange) {
+          onStoryChange(report.originalStory);
+        }
+      }
+      if (report.competency) {
+        setCompetency(report.competency);
+      }
+      if (report.storeCategory) {
+        setStoreCategory(report.storeCategory);
+      }
     }
   }));
   
@@ -94,23 +105,29 @@ const StoryForm = React.forwardRef(({
     setStoreCategory(e.target.value);
   };
 
-  // 清除按鈕處理函數 - 只清除故事文本
-  const handleClear = () => {
+  const resetFormInternal = () => {
     setStory('');
+    setCompetency('');
+    setStoreCategory('');
     if (onStoryChange) {
       onStoryChange('');
     }
+    if (formRef.current) {
+      formRef.current.reset();
+    }
   };
 
-  // 提交表單
+  const handleClear = () => {
+    resetFormInternal();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (story.trim() && !isOverLimit && !isLoading && competency && storeCategory) {
+    if (story.trim() && !isOverLimit && competency && storeCategory) {
       onSubmit(story, competency, storeCategory);
     }
   };
 
-  // 處理載入報告
   const handleReportSelected = (report) => {
     if (report && onReportLoaded) {
       onReportLoaded(report);
@@ -118,7 +135,6 @@ const StoryForm = React.forwardRef(({
   };
 
   const handleSampleStory = () => {
-    // 創建多個範例故事模板，專為櫃姐和第一線業務人員設計
     const storyTemplates = [
       `上個月，我們品牌推出新款香水時，我注意到許多顧客對於香調難以選擇。作為香水部門櫃姐，我主動整理了一份香調指南卡，並用精美瓶子製作了小樣供客人試聞。我還能根據顧客的穿著打扮和偏好，快速推薦最適合的香水。結果一個月內我的銷售額比目標高出30%，客戶回購率增加15%，主管還請我在部門會議分享我的銷售技巧。`,
       
@@ -131,7 +147,6 @@ const StoryForm = React.forwardRef(({
       `在數位家電部門工作時，我發現顧客經常抱怨售後服務不佳。作為一線銷售，我主動建立了客戶資料庫，記錄每位客人購買的產品和喜好，設置提醒系統定期關懷，並主動學習產品維修知識。當客人有問題，我能在第一時間提供協助。半年後，我的客戶投訴率降低了70%，回頭客增加50%，許多顧客指名要我服務，並為我帶來更多轉介紹客人，使我連續三個月達成業績第一名。`
     ];
     
-    // 隨機選擇一個故事模板
     const randomIndex = Math.floor(Math.random() * storyTemplates.length);
     const selectedStory = storyTemplates[randomIndex];
     
@@ -152,11 +167,10 @@ const StoryForm = React.forwardRef(({
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow="sm"
-      width="100%" // 確保始終佔滿容器寬度
-      maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }} // 響應式最大寬度
+      width="100%" 
+      maxWidth={{ base: "100%", md: "container.md", lg: "container.lg" }}
     >
       <VStack spacing={4} align="stretch">
-        {/* 載入報告按鈕 - 優化 RWD */}
         <Flex 
           justify={{ base: "center", sm: "flex-end" }}
           mb={{ base: 2, sm: 0 }}
@@ -166,18 +180,8 @@ const StoryForm = React.forwardRef(({
             size="md" 
             variant="outline"
             colorScheme="teal"
-            isDisabled={isLoading} // 只在加載時禁用
             onClick={onOpen}
             width={{ base: "100%", sm: "auto" }}
-            _disabled={{ 
-              opacity: 0.4, 
-              cursor: "not-allowed",
-              boxShadow: "none",
-              backgroundColor: "transparent",
-              pointerEvents: "none",
-              zIndex: "auto"
-            }}
-            zIndex="auto"
           >
             載入報告
           </Button>
@@ -191,7 +195,6 @@ const StoryForm = React.forwardRef(({
             placeholder="請選擇核心職能"
             value={competency}
             onChange={handleCompetencyChange}
-            isDisabled={isLoading} // 只在加載時禁用
             size="md"
           >
             {competencyOptions.map((option) => (
@@ -210,7 +213,6 @@ const StoryForm = React.forwardRef(({
             placeholder="請選擇商店類別"
             value={storeCategory}
             onChange={handleStoreCategoryChange}
-            isDisabled={isLoading} // 只在加載時禁用
             size="md"
           >
             {storeCategoryOptions.map((option) => (
@@ -235,8 +237,7 @@ const StoryForm = React.forwardRef(({
             size="lg"
             rows={8}
             resize="vertical"
-            maxLength={MAX_CHARS + 10} // 允許稍微超過一點，但會顯示警告
-            isDisabled={isLoading} // 只在加載時禁用
+            maxLength={MAX_CHARS + 10}
           />
           {isOverLimit ? (
             <FormHelperText color="red.500">
@@ -249,7 +250,6 @@ const StoryForm = React.forwardRef(({
           )}
         </FormControl>
 
-        {/* 更新後的按鈕佈局 - 使用 Stack 自動適應不同設備 */}
         <Stack 
           direction={{ base: 'column', md: 'row' }} 
           spacing={{ base: 2, md: 4 }} 
@@ -267,17 +267,7 @@ const StoryForm = React.forwardRef(({
               variant="outline"
               onClick={handleSampleStory}
               size="md"
-              isDisabled={isLoading} // 只在加載時禁用
               width={{ base: '100%', sm: 'auto' }}
-              _disabled={{ 
-                opacity: 0.4, 
-                cursor: "not-allowed",
-                boxShadow: "none",
-                backgroundColor: "transparent",
-                pointerEvents: "none",
-                zIndex: "auto"
-              }}
-              zIndex="auto"
             >
               載入範本
             </Button>
@@ -287,18 +277,8 @@ const StoryForm = React.forwardRef(({
               onClick={handleClear}
               size="md"
               colorScheme="red"
-              isDisabled={story.trim() === '' || isLoading} // 只在加載時或內容為空時禁用
+              isDisabled={story.trim() === ''}
               width={{ base: '100%', sm: 'auto' }}
-              _disabled={{ 
-                opacity: 0.4, 
-                cursor: "not-allowed",
-                boxShadow: "none",
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-                pointerEvents: "none",
-                zIndex: "auto"
-              }}
-              zIndex="auto"
             >
               清除內容
             </Button>
@@ -309,26 +289,16 @@ const StoryForm = React.forwardRef(({
             colorScheme="blue"
             isLoading={isLoading}
             loadingText="生成中..."
-            isDisabled={story.trim() === '' || isOverLimit || !competency || !storeCategory || isLoading}
-            // 只在必要條件不滿足或加載時禁用
+            isDisabled={story.trim() === '' || isOverLimit || !competency || !storeCategory}
             size="md"
             width={{ base: '100%', md: 'auto' }}
-            mt={{ base: 2, md: 0 }} // 在行動裝置上增加上邊距
-            _disabled={{ 
-              opacity: 0.4, 
-              cursor: "not-allowed",
-              boxShadow: "none",
-              pointerEvents: "none",
-              zIndex: "auto"
-            }}
-            zIndex="auto"
+            mt={{ base: 2, md: 0 }}
           >
             生成STAR報告
           </Button>
         </Stack>
       </VStack>
 
-      {/* 載入報告對話框 */}
       <LoadReportsDialog 
         isOpen={isOpen} 
         onClose={onClose} 

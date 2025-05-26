@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+// 修復 client/src/pages/Home.js 中的狀態同步問題
+
+import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { Box, VStack, Heading, Text, useToast, useColorModeValue, Container } from '@chakra-ui/react';
 import StoryForm from '../components/StoryForm';
 import StarReport from '../components/StarReport';
@@ -10,64 +12,62 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [report, setReport] = useState(null);
   const [story, setStory] = useState('');
-  const [showReport, setShowReport] = useState(false); // 新增控制報告顯示的狀態
+  const [showReport, setShowReport] = useState(false);
   const { setHasContent, setIsLoading: setAppLoading } = useContext(AppContext);
   const storyFormRef = useRef(null);
   
-  // 同步本地和全局狀態
+  // 🔧 修復：簡化狀態同步邏輯，不要讓它影響表單
   useEffect(() => {
-    // 當有報告或正在加載時，設置全局狀態
+    // 只設置全局內容狀態，不影響加載狀態
     setHasContent(!!report || story.trim().length > 0);
-    setAppLoading(isLoading);
-  }, [report, isLoading, story, setHasContent, setAppLoading]);
+    // 注意：這裡不要同步 isLoading 到全局，避免影響表單
+  }, [report, story, setHasContent]);
   
-  // 監聽故事內容變化
-  const handleStoryChange = (newStory) => {
+  // 🔧 修復：單獨管理全局加載狀態，避免干擾表單
+  useEffect(() => {
+    setAppLoading(isLoading);
+  }, [isLoading, setAppLoading]);
+  
+  // 🔧 修復：使用 useCallback 確保函數穩定，避免無限重新渲染
+  const handleStoryChange = useCallback((newStory) => {
     setStory(newStory);
     
-    // 如果當前有報告，更新報告的原始故事
     if (report) {
       setReport(prevReport => ({
         ...prevReport,
         originalStory: newStory
       }));
     }
-  };
+  }, [report]);
   
-  // 重置表單和移除報告顯示 - 只重置故事內容
+  // 重置表單和移除報告顯示
   const resetForm = () => {
-    setShowReport(false); // 隱藏報告區塊
+    setShowReport(false);
     
-    // 使用 ref 重置表單 - 這裡會調用 StoryForm 中的 resetForm 方法，它現在只會重置故事內容
     if (storyFormRef.current) {
       storyFormRef.current.resetForm();
     }
     
-    // 返回頂部
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 生成報告的函數 - 使用 API 服務
+  // 生成報告的函數
   const generateReport = async (story, competency, storeCategory) => {
     setIsLoading(true);
     
     try {
-      // 調用 API 服務
       const response = await apiService.generateStarReport({ 
         story, 
         competency, 
         storeCategory 
       });
       
-      // 確保報告數據包含 originalStory
       const reportData = {
         ...response.data,
-        originalStory: story, // 確保設置原始故事
+        originalStory: story,
       };
       
-      // 設置報告數據
       setReport(reportData);
-      // 顯示報告區塊
       setShowReport(true);
       
       toast({
@@ -78,7 +78,6 @@ const Home = () => {
         position: 'top',
       });
       
-      // 報告生成後滾動到報告部分
       setTimeout(() => {
         window.scrollTo({ 
           top: document.body.scrollHeight, 
@@ -104,17 +103,18 @@ const Home = () => {
   // 處理載入報告
   const handleReportLoaded = (loadedReport) => {
     if (loadedReport) {
-      // 設置報告數據
       setReport(loadedReport);
-      // 顯示報告區塊
       setShowReport(true);
       
-      // 如果報告有原始故事，設置故事狀態
       if (loadedReport.originalStory) {
         setStory(loadedReport.originalStory);
       }
       
-      // 提示用戶
+      // 🔧 修復：使用新的 loadReport 方法來填充表單
+      if (storyFormRef.current) {
+        storyFormRef.current.loadReport(loadedReport);
+      }
+      
       toast({
         title: '報告載入成功',
         status: 'success',
@@ -123,7 +123,6 @@ const Home = () => {
         position: 'top',
       });
       
-      // 滾動到報告部分
       setTimeout(() => {
         window.scrollTo({ 
           top: document.body.scrollHeight, 
@@ -158,10 +157,9 @@ const Home = () => {
           isLoading={isLoading} 
           onStoryChange={handleStoryChange} 
           onReportLoaded={handleReportLoaded}
-          currentReport={report} // 傳遞當前報告給表單
+          currentReport={report}
         />
         
-        {/* 使用 showReport 控制報告顯示 */}
         {showReport && report && (
           <StarReport report={report} onNewReport={resetForm} />
         )}
